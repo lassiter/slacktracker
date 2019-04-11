@@ -1,4 +1,4 @@
-
+require 'time_difference'
 class Tracker < ActiveRecord::Base
   belongs_to :user
 
@@ -18,8 +18,8 @@ class Tracker < ActiveRecord::Base
     if user.trackers.where(end_time: nil).exists?
       t = user.trackers.where(end_time: nil).first
       t.update_attribute(:end_time, DateTime.now)
-      tracked_total = 
-      return "Sucessfully Clocked out at: #{t.end_time}!\nYou spent a total of #{}"
+      tracked_total = TimeDifference.between(t.start_time, t.end_time).humanize
+      return "Sucessfully Clocked out at: #{t.end_time}!\nTime Spent: #{tracked_total}."
     else
       t = Tracker.new(user_id: user.id, start_time: DateTime.now)
       t.save

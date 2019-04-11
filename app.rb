@@ -3,7 +3,8 @@ require 'sinatra'
 require 'sinatra/activerecord'
 require 'pry-byebug'
 
-set :database, "sqlite3:slack-time-tracker.sqlite3"
+configure { set :server, :puma }
+set :database, {adapter: "sqlite3", database: "slack-time-tracker.sqlite3"}
 
 Dir["./models/*.rb"].each {|file| require file }
 
