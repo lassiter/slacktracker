@@ -18,39 +18,46 @@ post '/slack/tracker' do
   @user = User.find_by(slack_user_id: params[:user_id])
   create_user(params) if @user.nil?
   case params[:text]
-  when ""
+  when ''
     response_message = Tracker.get_time(params, @user)
     response = {
       "response_type": "ephemeral",
-      "text": "#{response_message}"
+      "text": "#{response_message} #{params[:text]}"
     }
     response.to_json
   when "start"
     response_message = Tracker.start(params, @user)
     response = {
       "response_type": "ephemeral",
-      "text": "#{response_message}"
+      "text": "#{response_message} #{params[:text]}"
     }
     response.to_json
   when "stop"
     response_message = Tracker.stop(params, @user)
     response = {
       "response_type": "ephemeral",
-      "text": "#{response_message}"
+      "text": "#{response_message} #{params[:text]}"
     }
     response.to_json
-  when "help"
-    response_message = Tracker.help(params, @user)
+  when "restart"
+    response_message = Tracker.restart(params, @user)
     response = {
       "response_type": "ephemeral",
-      "text": "See help below!",
-      "attachments": [
-          {
-              "text":"Partly cloudy today and tomorrow"
-          }
-      ]
+      "text": "#{response_message} #{params[:text]}"
     }
     response.to_json
+  when 'total'
+    response_message = Tracker.get_all_time(params, @user)
+    response = {
+      "response_type": "ephemeral",
+      "text": "#{response_message} #{params[:text]}"
+    }
+    response.to_json
+  when 'help'
+    response = {
+      "response_type": "ephemeral",
+      "text": "These are the command you can type:\n'/slacktracker' which will show the time spent on the current task\n'/slacktracker help' which show what you're currently seeing\n'/slacktracker start' which will start the tracker\n'/slacktracker stop' which will stop the tracker\n'/slacktracker restart' which will reset the tracker start time\n'/slacktracker total' which will tell you all of your tracked time"
+    }.to_json
   else
   end
 end

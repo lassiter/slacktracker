@@ -14,7 +14,6 @@ class Tracker < ActiveRecord::Base
   end
 
   def self.stop(params, user)
-    binding.pry
     if user.trackers.where(end_time: nil).exists?
       t = user.trackers.where(end_time: nil).first
       t.update_attribute(:end_time, DateTime.now)
@@ -28,14 +27,36 @@ class Tracker < ActiveRecord::Base
   end
 
   def self.get_time(params, user)
-    binding.pry
+    if user.trackers.where(end_time: nil).exists?
+      t = user.trackers.where(end_time: nil).last
+      return "You've been working for: #{TimeDifference.between(t.start_time, DateTime.now).humanize}\nType \"/slacktracker stop\" to stop tracking your time."
+    else
+      return "Looks like you're not tracking anything!\nType \"/slacktracker start\" to start tracking your time."
+    end
   end
 
   def self.get_all_time(params, user)
-    binding.pry
+    array_of_trackers = user.trackers.where.not(end_time: nil)
+    seconds = 0
+    array_of_trackers.each do |t|
+      seconds += TimeDifference.between(t.start_time, t.end_time).in_seconds
+    end
+    if user.trackers.where(end_time: nil).exists?
+      tracker = user.trackers.where(end_time: nil).last
+      seconds += TimeDifference.between(tracker.start_time, DateTime.now).in_seconds
+      return "The total of all of your tracked time is: #{Time.at(seconds).utc.strftime("%H:%M:%S")}\nYou're still on the clock from when you started tracking at: #{tracker.start_time}."
+    else
+      return "The total of all of your tracked time is: #{Time.at(seconds).utc.strftime("%H:%M:%S")}"
+    end
   end
 
   def self.restart(params, user)
-    binding.pry
+    if user.trackers.where(end_time: nil).exists?
+      t = user.trackers.where(end_time: nil).last
+      t.update_attribute(:start_time, DateTime.now)
+      return "Restarting the clock at a start time of: #{t.start_time}!"
+    else
+      return "There is nothing to restart!"
+    end
   end
 end
