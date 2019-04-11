@@ -9,8 +9,7 @@ set :database, {adapter: "sqlite3", database: "slack-time-tracker.sqlite3"}
 Dir["./models/*.rb"].each {|file| require file }
 
 get '/' do
-  # @users = User.all
-  {:hello => 'person!'}.to_json
+  "Hello! Slack Tracker is running!"
 end
 
 post '/slack/tracker' do
@@ -22,35 +21,35 @@ post '/slack/tracker' do
     response_message = Tracker.get_time(params, @user)
     response = {
       "response_type": "ephemeral",
-      "text": "#{response_message} #{params[:text]}"
+      "text": "#{response_message}"
     }
     response.to_json
   when "start"
     response_message = Tracker.start(params, @user)
     response = {
       "response_type": "ephemeral",
-      "text": "#{response_message} #{params[:text]}"
+      "text": "#{response_message}"
     }
     response.to_json
   when "stop"
     response_message = Tracker.stop(params, @user)
     response = {
       "response_type": "ephemeral",
-      "text": "#{response_message} #{params[:text]}"
+      "text": "#{response_message}"
     }
     response.to_json
   when "restart"
     response_message = Tracker.restart(params, @user)
     response = {
       "response_type": "ephemeral",
-      "text": "#{response_message} #{params[:text]}"
+      "text": "#{response_message}"
     }
     response.to_json
   when 'total'
     response_message = Tracker.get_all_time(params, @user)
     response = {
       "response_type": "ephemeral",
-      "text": "#{response_message} #{params[:text]}"
+      "text": "#{response_message}"
     }
     response.to_json
   when 'help'
