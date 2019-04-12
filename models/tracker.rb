@@ -2,13 +2,14 @@ require 'time_difference'
 class Tracker < ActiveRecord::Base
   belongs_to :user
 
+  validates :user_id, presence: true
+  validates :start_time, presence: true, uniqueness: true
 
   def self.start(params, user)
     if user.trackers.where(end_time: nil).exists?
       return "It looks like you're alredy on the clock!\nStarting at #{user.trackers.where(end_time: nil).first.start_time}!"
     else
-      t = Tracker.new(user_id: user.id, start_time: DateTime.now)
-      t.save
+      t = Tracker.create(user_id: user.id, start_time: DateTime.now)
       return "The clock started ticking at: #{t.start_time}!"
     end
   end
@@ -20,9 +21,7 @@ class Tracker < ActiveRecord::Base
       tracked_total = TimeDifference.between(t.start_time, t.end_time).humanize
       return "Sucessfully Clocked out at: #{t.end_time}!\nTime Spent: #{tracked_total}."
     else
-      t = Tracker.new(user_id: user.id, start_time: DateTime.now)
-      t.save
-      return "The clock started ticking at: #{t.start_time}!"
+      return "There is nothing to stop!\nType \"/slacktracker start\" to start tracking your time."
     end
   end
 
@@ -56,7 +55,7 @@ class Tracker < ActiveRecord::Base
       t.update_attribute(:start_time, DateTime.now)
       return "Restarting the clock at a start time of: #{t.start_time}!"
     else
-      return "There is nothing to restart!"
+      return "There is nothing to restart!\nType \"/slacktracker start\" to start tracking your time."
     end
   end
 end

@@ -4,7 +4,12 @@ require 'sinatra/activerecord'
 require 'pry-byebug'
 
 configure { set :server, :puma }
-set :database, {adapter: "sqlite3", database: "slack-time-tracker.sqlite3"}
+
+if ENV['RACK_ENV'] === "test"
+  set :database, {adapter: "sqlite3", database: "test-slack-time-tracker.sqlite3"}
+else
+  set :database, {adapter: "sqlite3", database: "slack-time-tracker.sqlite3"}
+end
 
 Dir["./models/*.rb"].each {|file| require file }
 
@@ -13,6 +18,7 @@ get '/' do
 end
 
 post '/slack/tracker' do
+  return status 400 if params.empty? || params[:text].nil?
   content_type 'application/json'
   @user = User.find_by(slack_user_id: params[:user_id])
   create_user(params) if @user.nil?
