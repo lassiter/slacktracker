@@ -58,4 +58,13 @@ class Tracker < ActiveRecord::Base
       return "There is nothing to restart!\nType \"/slacktracker start\" to start tracking your time."
     end
   end
+
+  def self.clear(params, user)
+    if user.trackers.exists?
+      user.trackers.delete_all
+      return "You have cleared all of your trackers."
+    else
+      return "You had no trackers to clear."
+    end
+  end
 end

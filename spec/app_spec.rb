@@ -210,4 +210,35 @@ describe "Valid Slack Tracker Endpoint 'slack/tracker' " do
       expect(parsed_response).to eq("These are the command you can type:\n'/slacktracker' which will show the time spent on the current task\n'/slacktracker help' which show what you're currently seeing\n'/slacktracker start' which will start the tracker\n'/slacktracker stop' which will stop the tracker\n'/slacktracker restart' which will reset the tracker start time\n'/slacktracker total' which will tell you all of your tracked time")
     end
   end
+  context 'params[:text] is clear' do
+    before(:each) do
+      Tracker.delete_all
+      @params = valid_params_of_existing_user
+      @user = User.find_or_create_by(slack_user_id: @params["user_id"], slack_team_id: @params["team_id"])
+      @params[:text] = "clear"
+    end
+    it 'should let the user know there were no tracker to clear' do
+      post @endpoint, @params
+      parsed_response = JSON.parse(last_response.body)["text"]
+      expect(parsed_response).to eq("You had no trackers to clear.")
+    end
+    it 'should clear all the trackers' do
+      @user.trackers.create(start_time: 3.hours.ago, end_time: 1.hours.ago)
+      @user.trackers.create(start_time: 2.day.ago, end_time: 1.day.ago)
+      post @endpoint, @params
+      parsed_response = JSON.parse(last_response.body)["text"]
+      expect(parsed_response).to eq("You have cleared all of your trackers.")
+    end
+  end
+  context 'params[:text] is foo' do
+    before(:each) do
+      Tracker.delete_all
+      @params = valid_params_of_existing_user
+      @params[:text] = "foo"
+    end
+    it 'should let the user know there were no tracker to clear' do
+      post @endpoint, @params
+      expect(last_response.status).to eq(400)
+    end
+  end
 end

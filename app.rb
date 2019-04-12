@@ -63,7 +63,15 @@ post '/slack/tracker' do
       "response_type": "ephemeral",
       "text": "These are the command you can type:\n'/slacktracker' which will show the time spent on the current task\n'/slacktracker help' which show what you're currently seeing\n'/slacktracker start' which will start the tracker\n'/slacktracker stop' which will stop the tracker\n'/slacktracker restart' which will reset the tracker start time\n'/slacktracker total' which will tell you all of your tracked time"
     }.to_json
+  when 'clear'
+    response_message = Tracker.clear(params, @user)
+    response = {
+      "response_type": "ephemeral",
+      "text": "#{response_message}"
+    }
+    response.to_json
   else
+    return status 400
   end
 end
 
